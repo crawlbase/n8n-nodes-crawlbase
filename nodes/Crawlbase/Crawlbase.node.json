@@ -1,0 +1,18 @@
+{
+  "node": "n8n-nodes-crawlbase",
+  "nodeVersion": "1.0",
+  "codexVersion": "1.0",
+  "categories": ["Development", "Data", "Utility"],
+  "resources": {
+    "credentialDocumentation": [
+      {
+        "url": "https://crawlbase.com/docs/crawling-api"
+      }
+    ],
+    "primaryDocumentation": [
+      {
+        "url": "https://crawlbase.com/docs/crawling-api"
+      }
+    ]
+  }
+}

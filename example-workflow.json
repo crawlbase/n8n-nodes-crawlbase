@@ -1,0 +1,54 @@
+{
+  "name": "Crawlbase – Crawl a single URL",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "start",
+      "name": "When clicking 'Test workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "urlSource": "parameter",
+        "url": "https://example.com",
+        "method": "GET",
+        "format": "html"
+      },
+      "id": "crawlbase",
+      "name": "Crawlbase",
+      "type": "n8n-nodes-crawlbase.crawlbase",
+      "typeVersion": 1,
+      "position": [460, 300],
+      "credentials": {
+        "crawlbaseApi": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Crawlbase API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking 'Test workflow'": {
+      "main": [
+        [
+          {
+            "node": "Crawlbase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "settings": {},
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-01-01T00:00:00.000Z",
+  "versionId": "1"
+}
