@@ -6,7 +6,7 @@ import type {
   IHttpRequestOptions,
 } from 'n8n-workflow';
 import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
-import { CRAWLBASE_API_BASE, CRAWL_URL_PREFIX, DEFAULT_TIMEOUT_MS } from './constants';
+import { CRAWLBASE_API_BASE, DEFAULT_TIMEOUT_MS } from './constants';
 
 /** Node options from the Options collection. */
 interface CrawlbaseNodeOptions {
@@ -51,7 +51,13 @@ function parseCustomHeaders(
 }
 
 function isValidCrawlUrl(url: string): boolean {
-  return typeof url === 'string' && url.trim().startsWith(CRAWL_URL_PREFIX);
+  if (typeof url !== 'string' || !url.trim()) return false;
+  try {
+    const parsed = new URL(url.trim());
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
 }
 
 function normalizeCrawlResponse(response: {
@@ -331,6 +337,13 @@ function resolveWorkItems(ctx: IExecuteFunctions, items: INodeExecutionData[], u
     let url: string;
     if (urlSource === 'parameter') {
       url = (ctx.getNodeParameter('url', i) as string)?.trim() ?? '';
+      if (!isValidCrawlUrl(url)) {
+        throw new NodeOperationError(
+          ctx.getNode(),
+          `[Item ${i + 1}] Please enter a valid URL starting with http or https.`,
+          { itemIndex: i },
+        );
+      }
     } else {
       const urlField = ctx.getNodeParameter('urlField', i) as string;
       const val = items[i].json[urlField];

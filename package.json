@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Crawlbase node for n8n — crawl web pages with native credentials and the Crawling API",
   "license": "MIT",
-  "homepage": "https://github.com/crawlbase/crawlbase-node#readme",
+  "homepage": "https://gitlab.devandgo.com/main/n8n-nodes-crawlbase",
   "keywords": [
     "n8n-community-node-package",
     "n8n",
@@ -15,8 +15,7 @@
   "author": { "name": "Crawlbase", "email": "info@crawlbase.com" },
   "repository": {
     "type": "git",
-    "url": "https://github.com/crawlbase/crawlbase-node.git",
-    "directory": "n8n"
+    "url": "https://gitlab.devandgo.com/main/n8n-nodes-crawlbase.git"
   },
   "scripts": {
     "build": "node node_modules/typescript/bin/tsc && node -e \"const fs=require('fs'); const p='dist/icons'; fs.mkdirSync(p,{recursive:true}); fs.copyFileSync('icons/crawlbase.svg', p+'/crawlbase.svg'); fs.copyFileSync('icons/crawlbase.dark.svg', p+'/crawlbase.dark.svg');\"",
