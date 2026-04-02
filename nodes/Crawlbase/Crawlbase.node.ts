@@ -8,12 +8,34 @@ import type {
 import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 import { CRAWLBASE_API_BASE, DEFAULT_TIMEOUT_MS } from './constants';
 
-/** Node options from the Options collection. */
+/** Node options from the Options collection (maps to Crawling API query parameters). */
 interface CrawlbaseNodeOptions {
   pageWait?: number;
   country?: string;
   timeout?: number;
+  /** JSON object serialized to API `request_headers` (pipe-separated name:value). */
   customHeaders?: string | Record<string, string>;
+  pretty?: boolean;
+  userAgent?: string;
+  ajaxWait?: boolean;
+  cssClickSelector?: string;
+  device?: string;
+  getCookies?: boolean;
+  getHeaders?: boolean;
+  cookies?: string;
+  cookiesSession?: string;
+  screenshot?: boolean;
+  screenshotMode?: string;
+  screenshotWidth?: number;
+  screenshotHeight?: number;
+  store?: boolean;
+  scraper?: string;
+  asyncCrawl?: boolean;
+  autoparse?: boolean;
+  torNetwork?: boolean;
+  scroll?: boolean;
+  scrollInterval?: number;
+  customSuccessCodes?: string;
 }
 
 /** One URL to crawl with its paired item index. */
@@ -37,17 +59,30 @@ interface CrawlOutputItem {
   metadata: CrawlMetadata;
 }
 
-function parseCustomHeaders(
+function parseRequestHeadersJson(
   getNode: IExecuteFunctions['getNode'],
   value: string | Record<string, string> | undefined,
 ): Record<string, string> {
   if (value == null) return {};
   if (typeof value === 'object') return value;
+  const trimmed = value.trim();
+  if (trimmed === '' || trimmed === '{}') return {};
   try {
-    return JSON.parse(value) as Record<string, string>;
+    return JSON.parse(trimmed) as Record<string, string>;
   } catch {
-    throw new NodeOperationError(getNode(), 'Custom Headers must be valid JSON (e.g. {"X-Header": "value"}).');
+    throw new NodeOperationError(
+      getNode(),
+      'request_headers (JSON) must be valid JSON (e.g. {"accept-language": "en-GB"}).',
+    );
   }
+}
+
+/** Crawlbase API: `request_headers` as `name:value|name2:value2`. */
+function serializeRequestHeaders(headers: Record<string, string>): string {
+  return Object.entries(headers)
+    .filter(([, v]) => v != null && String(v).trim() !== '')
+    .map(([k, v]) => `${k}:${String(v).trim()}`)
+    .join('|');
 }
 
 function isValidCrawlUrl(url: string): boolean {
@@ -105,6 +140,104 @@ function normalizeCrawlResponse(response: {
   return { statusCode, headers, body, metadata: meta };
 }
 
+/** Build Crawling API query string parameters from node options. */
+function buildCrawlbaseQs(
+  opts: CrawlbaseNodeOptions,
+  url: string,
+  format: string,
+  getNode: IExecuteFunctions['getNode'],
+): Record<string, string | number | boolean> {
+  const qs: Record<string, string | number | boolean> = {
+    url,
+    format: format || 'html',
+  };
+
+  if (opts.pageWait != null && opts.pageWait > 0) {
+    qs.page_wait = opts.pageWait;
+  }
+  if (opts.country?.trim()) {
+    qs.country = opts.country.trim();
+  }
+
+  if (format === 'json' && opts.pretty === true) {
+    qs.pretty = true;
+  }
+  if (opts.userAgent?.trim()) {
+    qs.user_agent = opts.userAgent.trim();
+  }
+  if (opts.ajaxWait === true) {
+    qs.ajax_wait = true;
+  }
+  if (opts.cssClickSelector?.trim()) {
+    qs.css_click_selector = opts.cssClickSelector.trim();
+  }
+  if (opts.device === 'desktop' || opts.device === 'mobile') {
+    qs.device = opts.device;
+  }
+  if (opts.getCookies === true) {
+    qs.get_cookies = true;
+  }
+  if (opts.getHeaders === true) {
+    qs.get_headers = true;
+  }
+
+  const rh = serializeRequestHeaders(parseRequestHeadersJson(getNode, opts.customHeaders));
+  if (rh) {
+    qs.request_headers = rh;
+  }
+
+  if (opts.cookies?.trim()) {
+    qs.cookies = opts.cookies.trim();
+  }
+  if (opts.cookiesSession?.trim()) {
+    const s = opts.cookiesSession.trim();
+    if (s.length > 32) {
+      throw new NodeOperationError(getNode(), 'Cookies Session must be at most 32 characters.');
+    }
+    qs.cookies_session = s;
+  }
+
+  if (opts.screenshot === true) {
+    qs.screenshot = true;
+    if (opts.screenshotMode === 'viewport' || opts.screenshotMode === 'fullpage') {
+      qs.mode = opts.screenshotMode;
+    }
+    if (opts.screenshotWidth != null && opts.screenshotWidth > 0) {
+      qs.width = opts.screenshotWidth;
+    }
+    if (opts.screenshotHeight != null && opts.screenshotHeight > 0) {
+      qs.height = opts.screenshotHeight;
+    }
+  }
+
+  if (opts.store === true) {
+    qs.store = true;
+  }
+  if (opts.scraper?.trim()) {
+    qs.scraper = opts.scraper.trim();
+  }
+  if (opts.asyncCrawl === true) {
+    qs.async = true;
+  }
+  if (opts.autoparse === true) {
+    qs.autoparse = true;
+  }
+  if (opts.torNetwork === true) {
+    qs.tor_network = true;
+  }
+  if (opts.scroll === true) {
+    qs.scroll = true;
+    if (opts.scrollInterval != null && opts.scrollInterval > 0) {
+      qs.scroll_interval = opts.scrollInterval;
+    }
+  }
+  if (opts.customSuccessCodes?.trim()) {
+    qs.custom_success_codes = opts.customSuccessCodes.trim();
+  }
+
+  return qs;
+}
+
 export class Crawlbase implements INodeType {
   description: INodeTypeDescription = {
     displayName: 'Crawlbase',
@@ -115,7 +248,8 @@ export class Crawlbase implements INodeType {
     },
     group: ['transform'],
     version: 1,
-    subtitle: '={{ $parameter["urlSource"] === "item" ? $parameter["method"] + " (from input)" : ($parameter["url"] ? $parameter["method"] + ": " + $parameter["url"] : $parameter["method"]) }}',
+    subtitle:
+      '={{ $parameter["urlSource"] === "item" ? $parameter["method"] + " (from input)" : ($parameter["url"] ? $parameter["method"] + ": " + $parameter["url"] : $parameter["method"]) }}',
     description: 'Crawl a URL with Crawlbase Crawling API',
     defaults: {
       name: 'Crawlbase',
@@ -188,33 +322,201 @@ export class Crawlbase implements INodeType {
         default: {},
         options: [
           {
-            displayName: 'Page Wait (ms)',
-            name: 'pageWait',
-            type: 'number',
-            default: 0,
-            description: 'Time to wait for the page before returning (e.g. for JavaScript rendering)',
+            displayName: 'ajax_wait',
+            name: 'ajaxWait',
+            type: 'boolean',
+            default: false,
+            description: 'With the JavaScript token: wait for AJAX to finish before capture',
           },
           {
-            displayName: 'Country',
+            displayName: 'async',
+            name: 'asyncCrawl',
+            type: 'boolean',
+            default: false,
+            description: 'Asynchronous crawl; returns rid for Cloud Storage retrieval',
+          },
+          {
+            displayName: 'autoparse',
+            name: 'autoparse',
+            type: 'boolean',
+            default: false,
+            description: 'Return structured scraped data as JSON when supported',
+          },
+          {
+            displayName: 'cookies',
+            name: 'cookies',
+            type: 'string',
+            default: '',
+            placeholder: 'key1=value1; key2=value2',
+            description: 'Cookie string sent to the target (set_cookies)',
+          },
+          {
+            displayName: 'cookies_session',
+            name: 'cookiesSession',
+            type: 'string',
+            default: '',
+            placeholder: 'max 32 characters',
+            description: 'Session id to persist cookies across calls; expires 300s after last call',
+          },
+          {
+            displayName: 'country',
             name: 'country',
             type: 'string',
             default: '',
             placeholder: 'US',
-            description: 'Country code for geo-targeting where supported',
+            description: 'Two-letter country code for geo-targeted requests',
           },
           {
-            displayName: 'Timeout (ms)',
-            name: 'timeout',
+            displayName: 'css_click_selector',
+            name: 'cssClickSelector',
+            type: 'string',
+            default: '',
+            placeholder: '#button, body',
+            description:
+              'With the JS token: CSS selector to click before capture; use | for multiple steps. URL-encode special characters.',
+          },
+          {
+            displayName: 'custom_success_codes',
+            name: 'customSuccessCodes',
+            type: 'string',
+            default: '',
+            placeholder: '403,429,503',
+            description: 'Comma-separated HTTP status codes treated as success',
+          },
+          {
+            displayName: 'device',
+            name: 'device',
+            type: 'options',
+            default: '',
+            options: [
+              { name: '', value: '' },
+              { name: 'desktop', value: 'desktop' },
+              { name: 'mobile', value: 'mobile' },
+            ],
+            description: 'desktop or mobile',
+          },
+          {
+            displayName: 'get_cookies',
+            name: 'getCookies',
+            type: 'boolean',
+            default: false,
+            description: 'Return Set-Cookie from the target in original_set_cookie',
+          },
+          {
+            displayName: 'get_headers',
+            name: 'getHeaders',
+            type: 'boolean',
+            default: false,
+            description: 'Return response headers from the target',
+          },
+          {
+            displayName: 'height',
+            name: 'screenshotHeight',
             type: 'number',
-            default: DEFAULT_TIMEOUT_MS,
-            description: 'Request timeout in milliseconds',
+            default: 0,
+            description: 'With screenshot=true and mode=viewport: max height in pixels',
+            displayOptions: { show: { screenshot: [true] } },
           },
           {
-            displayName: 'Custom Headers',
+            displayName: 'mode',
+            name: 'screenshotMode',
+            type: 'options',
+            default: 'fullpage',
+            options: [
+              { name: 'fullpage', value: 'fullpage' },
+              { name: 'viewport', value: 'viewport' },
+            ],
+            description: 'Screenshot capture mode when screenshot=true',
+            displayOptions: { show: { screenshot: [true] } },
+          },
+          {
+            displayName: 'page_wait',
+            name: 'pageWait',
+            type: 'number',
+            default: 0,
+            description: 'With the JavaScript token: milliseconds to wait before capture',
+          },
+          {
+            displayName: 'pretty',
+            name: 'pretty',
+            type: 'boolean',
+            default: false,
+            description: 'When format is JSON, pretty-print the response',
+            displayOptions: { show: { '/format': ['json'] } },
+          },
+          {
+            displayName: 'request_headers',
             name: 'customHeaders',
             type: 'json',
             default: '{}',
-            description: 'Additional headers as JSON object (e.g. {"X-Custom": "value"})',
+            description:
+              'JSON object of header names to values; sent as API request_headers (pipe-separated name:value)',
+          },
+          {
+            displayName: 'screenshot',
+            name: 'screenshot',
+            type: 'boolean',
+            default: false,
+            description: 'With the JS token: return a JPEG screenshot URL',
+          },
+          {
+            displayName: 'scraper',
+            name: 'scraper',
+            type: 'string',
+            default: '',
+            placeholder: 'amazon-product-details',
+            description: 'Named data scraper id; see Crawlbase dashboard',
+          },
+          {
+            displayName: 'scroll',
+            name: 'scroll',
+            type: 'boolean',
+            default: false,
+            description: 'With the JS token: auto-scroll to load dynamic content',
+          },
+          {
+            displayName: 'scroll_interval',
+            name: 'scrollInterval',
+            type: 'number',
+            default: 0,
+            description: 'Seconds to scroll (1–60; default 10 if unset when scroll is enabled)',
+            displayOptions: { show: { scroll: [true] } },
+          },
+          {
+            displayName: 'store',
+            name: 'store',
+            type: 'boolean',
+            default: false,
+            description: 'Store the response in Crawlbase Cloud Storage; returns storage_url',
+          },
+          {
+            displayName: 'timeout',
+            name: 'timeout',
+            type: 'number',
+            default: DEFAULT_TIMEOUT_MS,
+            description: 'HTTP client timeout in milliseconds (not a Crawlbase API parameter)',
+          },
+          {
+            displayName: 'tor_network',
+            name: 'torNetwork',
+            type: 'boolean',
+            default: false,
+            description: 'Crawl onion sites over Tor',
+          },
+          {
+            displayName: 'user_agent',
+            name: 'userAgent',
+            type: 'string',
+            default: '',
+            description: 'Custom User-Agent forwarded to the target URL',
+          },
+          {
+            displayName: 'width',
+            name: 'screenshotWidth',
+            type: 'number',
+            default: 0,
+            description: 'With screenshot=true and mode=viewport: max width in pixels',
+            displayOptions: { show: { screenshot: [true] } },
           },
         ],
       },
@@ -235,28 +537,18 @@ export class Crawlbase implements INodeType {
 
     const urlSource = this.getNodeParameter('urlSource', 0) as string;
     const method = this.getNodeParameter('method', 0) as 'GET' | 'POST' | 'PUT';
-    const format = this.getNodeParameter('format', 0) as string;
     const options = this.getNodeParameter('options', 0, {}) as CrawlbaseNodeOptions;
     const bodyParam = (this.getNodeParameter('body', 0, '') as string).trim();
 
     const workItems = resolveWorkItems(this, items, urlSource);
 
     const timeout = options.timeout ?? DEFAULT_TIMEOUT_MS;
-    const customHeaders = parseCustomHeaders(this.getNode.bind(this), options.customHeaders);
     const node = this.getNode();
 
     for (let i = 0; i < workItems.length; i++) {
       const { url, pairedItem } = workItems[i];
-      const qs: Record<string, string | number> = {
-        url,
-        format: format || 'html',
-      };
-      if (options.pageWait != null && options.pageWait > 0) {
-        qs.page_wait = options.pageWait;
-      }
-      if (options.country?.trim()) {
-        qs.country = options.country.trim();
-      }
+      const format = this.getNodeParameter('format', i) as string;
+      const qs = buildCrawlbaseQs(options, url, format, this.getNode.bind(this));
 
       const requestOptions: IHttpRequestOptions = {
         url: CRAWLBASE_API_BASE,
@@ -264,12 +556,11 @@ export class Crawlbase implements INodeType {
         qs,
         returnFullResponse: true,
         timeout,
-        headers: customHeaders,
       };
 
       if ((method === 'POST' || method === 'PUT') && bodyParam) {
         requestOptions.body = bodyParam;
-        requestOptions.headers = { ...requestOptions.headers, 'Content-Type': 'application/x-www-form-urlencoded' };
+        requestOptions.headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
       }
 
       try {
