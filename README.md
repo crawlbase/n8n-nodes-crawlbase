@@ -6,7 +6,7 @@ Crawlbase node for [n8n](https://n8n.io). Crawl web pages with native **Crawlbas
 
 - **Native credentials** — Add your Crawlbase API token once and use it across workflows; **Test connection** validates the token.
 - **Crawling API** — Single node for GET/POST/PUT with URL (from parameter or from each input item).
-- **Options** — Response format (HTML or JSON), page wait, country/geo, custom headers, timeout, and request body for POST/PUT.
+- **Options** — Optional Crawling API parameters (for example `format`, `page_wait`, `country`, `request_headers`, cookies, `device`, scraper, screenshot, store, async, and JS rendering helpers), **request body** for POST/PUT, and an HTTP **timeout** on the client (not a Crawlbase query parameter). See [Crawling API parameters](https://crawlbase.com/docs/crawling-api/parameters) for the full list and behavior.
 - **Normalized output** — Each item returns `statusCode`, `headers`, `body`, and `metadata` (including `originalStatus`, `cbStatus`, `url` where provided by the API).
 
 ## Installation
@@ -75,3 +75,7 @@ To get the node **verified** and listed in n8n’s integration catalog:
 ## License
 
 MIT
+
+---
+
+Copyright 2026 Crawlbase
