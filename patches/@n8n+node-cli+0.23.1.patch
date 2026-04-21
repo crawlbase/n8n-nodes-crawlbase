@@ -1,0 +1,13 @@
+diff --git a/node_modules/@n8n/node-cli/dist/commands/dev/index.js b/node_modules/@n8n/node-cli/dist/commands/dev/index.js
+index f6280e7..3c676cd 100644
+--- a/node_modules/@n8n/node-cli/dist/commands/dev/index.js
++++ b/node_modules/@n8n/node-cli/dist/commands/dev/index.js
+@@ -52,7 +52,7 @@ class Dev extends core_1.Command {
+         if (hasN8n) {
+             commandsList.push({
+                 cmd: 'npx',
+-                args: ['-y', '--color=always', '--prefer-online', 'n8n@latest'],
++                args: ['-y', '--color=always', '--prefer-online', 'n8n@2.18.0'],
+                 name: 'n8n Server',
+                 cwd: n8nUserFolder,
+                 env: {

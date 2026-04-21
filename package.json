@@ -1,0 +1,53 @@
+{
+  "name": "n8n-nodes-crawlbase",
+  "version": "0.1.0",
+  "description": "Crawlbase node for n8n — crawl web pages with native credentials and the Crawling API",
+  "license": "MIT",
+  "homepage": "https://github.com/crawlbase/n8n-nodes-crawlbase",
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n",
+    "crawlbase",
+    "crawling",
+    "scraping",
+    "scraper"
+  ],
+  "author": { "name": "Crawlbase", "email": "info@crawlbase.com" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/crawlbase/n8n-nodes-crawlbase"
+  },
+  "scripts": {
+    "postinstall": "node -e \"const fs=require('fs'),cp=require('child_process');if(fs.existsSync('node_modules/patch-package'))cp.execSync('node node_modules/patch-package/index.js',{stdio:'inherit'});\"",
+    "copy:icons": "copyfiles -u 1 \"icons/*.svg\" dist/icons",
+    "build": "npm run build:tsc && npm run copy:icons",
+    "build:watch": "node node_modules/typescript/bin/tsc --watch",
+    "build:tsc": "node node_modules/typescript/bin/tsc",
+    "test": "tsx --test nodes/Crawlbase/crawlbaseApi.helpers.test.ts",
+    "dev": "n8n-node dev",
+    "lint": "n8n-node lint",
+    "lint:fix": "n8n-node lint --fix",
+    "release": "n8n-node release",
+    "prepublishOnly": "n8n-node prerelease"
+  },
+  "files": ["dist", "README.md", "example-workflow.json"],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "strict": false,
+    "credentials": ["dist/credentials/CrawlbaseApi.credentials.js"],
+    "nodes": ["dist/nodes/Crawlbase/Crawlbase.node.js"]
+  },
+  "devDependencies": {
+    "@n8n/eslint-plugin-community-nodes": "0.9.0",
+    "@n8n/node-cli": "0.23.1",
+    "copyfiles": "^2.4.1",
+    "eslint": "^9.32.0",
+    "patch-package": "^8.0.1",
+    "prettier": "^3.6.2",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  },
+  "peerDependencies": { "n8n-workflow": "*" },
+  "engines": { "node": ">=22.16" },
+  "overrides": { "change-case": "4.1.2" }
+}
