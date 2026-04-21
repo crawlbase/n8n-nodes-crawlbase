@@ -44,7 +44,7 @@ export class CrawlbaseApi implements ICredentialType {
       url: '/',
       method: 'GET',
       qs: {
-        url: 'https://example.com',
+        url: '',
       },
     },
   };

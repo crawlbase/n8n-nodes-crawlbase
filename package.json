@@ -18,9 +18,12 @@
     "url": "https://github.com/crawlbase/n8n-nodes-crawlbase"
   },
   "scripts": {
-    "build": "node node_modules/typescript/bin/tsc && node -e \"const fs=require('fs'); const p='dist/icons'; fs.mkdirSync(p,{recursive:true}); fs.copyFileSync('icons/crawlbase.svg', p+'/crawlbase.svg'); fs.copyFileSync('icons/crawlbase.dark.svg', p+'/crawlbase.dark.svg');\"",
+    "postinstall": "node -e \"const fs=require('fs'),cp=require('child_process');if(fs.existsSync('node_modules/patch-package'))cp.execSync('node node_modules/patch-package/index.js',{stdio:'inherit'});\"",
+    "copy:icons": "copyfiles -u 1 \"icons/*.svg\" dist/icons",
+    "build": "npm run build:tsc && npm run copy:icons",
     "build:watch": "node node_modules/typescript/bin/tsc --watch",
     "build:tsc": "node node_modules/typescript/bin/tsc",
+    "test": "tsx --test nodes/Crawlbase/crawlbaseApi.helpers.test.ts",
     "dev": "n8n-node dev",
     "lint": "n8n-node lint",
     "lint:fix": "n8n-node lint --fix",
@@ -35,9 +38,13 @@
     "nodes": ["dist/nodes/Crawlbase/Crawlbase.node.js"]
   },
   "devDependencies": {
-    "@n8n/node-cli": "*",
+    "@n8n/eslint-plugin-community-nodes": "0.9.0",
+    "@n8n/node-cli": "0.23.1",
+    "copyfiles": "^2.4.1",
     "eslint": "^9.32.0",
+    "patch-package": "^8.0.1",
     "prettier": "^3.6.2",
+    "tsx": "^4.20.5",
     "typescript": "^5.9.2"
   },
   "peerDependencies": { "n8n-workflow": "*" },
