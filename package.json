@@ -1,6 +1,6 @@
 {
   "name": "@crawlbase/n8n-nodes",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Crawlbase node for n8n — crawl web pages with native credentials and the Crawling API",
   "license": "MIT",
   "homepage": "https://github.com/crawlbase/n8n-nodes-crawlbase",
@@ -12,7 +12,10 @@
     "scraping",
     "scraper"
   ],
-  "author": { "name": "Crawlbase", "email": "info@crawlbase.com" },
+  "author": {
+    "name": "Crawlbase",
+    "email": "info@crawlbase.com"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/crawlbase/n8n-nodes-crawlbase"
@@ -30,12 +33,20 @@
     "release": "n8n-node release",
     "prepublishOnly": "n8n-node prerelease"
   },
-  "files": ["dist", "README.md", "example-workflow.json"],
+  "files": [
+    "dist",
+    "README.md",
+    "example-workflow.json"
+  ],
   "n8n": {
     "n8nNodesApiVersion": 1,
     "strict": false,
-    "credentials": ["dist/credentials/CrawlbaseApi.credentials.js"],
-    "nodes": ["dist/nodes/Crawlbase/Crawlbase.node.js"]
+    "credentials": [
+      "dist/credentials/CrawlbaseApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/Crawlbase/Crawlbase.node.js"
+    ]
   },
   "devDependencies": {
     "@n8n/eslint-plugin-community-nodes": "0.9.0",
@@ -47,7 +58,13 @@
     "tsx": "^4.20.5",
     "typescript": "^5.9.2"
   },
-  "peerDependencies": { "n8n-workflow": "*" },
-  "engines": { "node": ">=22.16" },
-  "overrides": { "change-case": "4.1.2" }
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  },
+  "engines": {
+    "node": ">=22.16"
+  },
+  "overrides": {
+    "change-case": "4.1.2"
+  }
 }
