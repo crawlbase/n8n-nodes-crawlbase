@@ -1,6 +1,6 @@
 {
   "name": "@crawlbase/n8n-nodes",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Crawlbase node for n8n — crawl web pages, scrape public information, bypass CAPTCHAs, run automations",
   "license": "MIT",
   "homepage": "https://github.com/crawlbase/n8n-nodes-crawlbase",
