@@ -10,7 +10,8 @@
     "crawlbase",
     "crawling",
     "scraping",
-    "scraper"
+    "scraper",
+    "captcha"
   ],
   "author": {
     "name": "Crawlbase",
