@@ -17,8 +17,12 @@ test('parseRequestHeadersJson: empty and object', () => {
   assert.deepEqual(parseRequestHeadersJson(mockGetNode, ''), {});
   assert.deepEqual(parseRequestHeadersJson(mockGetNode, '  '), {});
   assert.deepEqual(parseRequestHeadersJson(mockGetNode, '{}'), {});
-  assert.deepEqual(parseRequestHeadersJson(mockGetNode, { a: 'b' }), { a: 'b' });
-  assert.deepEqual(parseRequestHeadersJson(mockGetNode, '{"x": "y"}'), { x: 'y' });
+  assert.deepEqual(parseRequestHeadersJson(mockGetNode, { a: 'b' }), {
+    a: 'b',
+  });
+  assert.deepEqual(parseRequestHeadersJson(mockGetNode, '{"x": "y"}'), {
+    x: 'y',
+  });
 });
 
 test('parseRequestHeadersJson: invalid JSON throws', () => {
@@ -59,7 +63,11 @@ test('normalizeCrawlResponse: string JSON body uses parse once', () => {
 });
 
 test('normalizeCrawlResponse: pre-parsed object body avoids stringify-parse for metadata', () => {
-  const bodyObj = { original_status: 404, pc_status: 200, url: 'https://target' };
+  const bodyObj = {
+    original_status: 404,
+    pc_status: 200,
+    url: 'https://target',
+  };
   const out = normalizeCrawlResponse({
     statusCode: 200,
     headers: { 'content-type': 'application/json' },

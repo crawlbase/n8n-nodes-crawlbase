@@ -96,10 +96,10 @@ export function inferPostBodyContentType(body: string): string {
   }
 }
 
-function extractParsedBody(response: {
-  headers?: Record<string, string>;
-  body?: unknown;
-}): { bodyStr: string; parsedForMeta: unknown } {
+function extractParsedBody(response: { headers?: Record<string, string>; body?: unknown }): {
+  bodyStr: string;
+  parsedForMeta: unknown;
+} {
   const headers = (response.headers as Record<string, string>) ?? {};
   const raw = response.body;
 
@@ -140,8 +140,7 @@ export function normalizeCrawlResponse(response: {
     ? {
         originalStatus: (parsedForMeta as { original_status?: number }).original_status,
         cbStatus:
-          (parsedForMeta as { cb_status?: number }).cb_status ??
-          (parsedForMeta as { pc_status?: number }).pc_status,
+          (parsedForMeta as { cb_status?: number }).cb_status ?? (parsedForMeta as { pc_status?: number }).pc_status,
         url: (parsedForMeta as { url?: string }).url ?? headers.url,
       }
     : {

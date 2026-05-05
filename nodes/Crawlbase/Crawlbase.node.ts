@@ -345,7 +345,9 @@ export class Crawlbase implements INodeType {
 
       if ((method === 'POST' || method === 'PUT') && bodyParam) {
         requestOptions.body = bodyParam;
-        requestOptions.headers = { 'Content-Type': inferPostBodyContentType(bodyParam) };
+        requestOptions.headers = {
+          'Content-Type': inferPostBodyContentType(bodyParam),
+        };
       }
 
       try {
