@@ -9,6 +9,7 @@ export interface CrawlbaseNodeOptions {
   /** JSON object serialized to API `request_headers` (pipe-separated name:value). */
   customHeaders?: string | Record<string, string>;
   pretty?: boolean;
+  mdReadability?: boolean;
   userAgent?: string;
   ajaxWait?: boolean;
   cssClickSelector?: string;
@@ -182,6 +183,9 @@ export function buildCrawlbaseQs(
   if (format === 'json' && opts.pretty === true) {
     qs.pretty = true;
   }
+  if (format === 'md' && opts.mdReadability === true) {
+    qs.md_readability = true;
+  }
   if (opts.userAgent?.trim()) {
     qs.user_agent = opts.userAgent.trim();
   }
@@ -191,7 +195,7 @@ export function buildCrawlbaseQs(
   if (opts.cssClickSelector?.trim()) {
     qs.css_click_selector = opts.cssClickSelector.trim();
   }
-  if (opts.device === 'desktop' || opts.device === 'mobile') {
+  if (opts.device === 'desktop' || opts.device === 'tablet' || opts.device === 'mobile') {
     qs.device = opts.device;
   }
   if (opts.getCookies === true) {

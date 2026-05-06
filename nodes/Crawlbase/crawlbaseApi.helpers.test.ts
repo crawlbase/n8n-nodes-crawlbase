@@ -117,6 +117,27 @@ test('buildCrawlbaseQs: maps options and format', () => {
   assert.equal(qs.async, true);
 });
 
+test('buildCrawlbaseQs: maps markdown readability and tablet device', () => {
+  const qs = buildCrawlbaseQs(
+    {
+      mdReadability: true,
+      device: 'tablet',
+    },
+    'https://example.com/article',
+    'md',
+    mockGetNode,
+  );
+  assert.equal(qs.format, 'md');
+  assert.equal(qs.md_readability, true);
+  assert.equal(qs.device, 'tablet');
+});
+
+test('buildCrawlbaseQs: ignores md_readability outside markdown format', () => {
+  const qs = buildCrawlbaseQs({ mdReadability: true }, 'https://example.com', 'json', mockGetNode);
+  assert.equal(qs.format, 'json');
+  assert.equal(qs.md_readability, undefined);
+});
+
 test('buildCrawlbaseQs: cookies_session over 32 chars throws', () => {
   const long = 'x'.repeat(33);
   assert.throws(
