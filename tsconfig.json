@@ -3,7 +3,7 @@
     "strict": true,
     "module": "commonjs",
     "moduleResolution": "node",
-    "ignoreDeprecations": "6.0",
+    "ignoreDeprecations": "5.0",
     "target": "es2023",
     "lib": ["es2023", "es2022.error"],
     "removeComments": true,

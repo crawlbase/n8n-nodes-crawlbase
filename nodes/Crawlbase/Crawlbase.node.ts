@@ -94,8 +94,10 @@ export class Crawlbase implements INodeType {
         options: [
           { name: 'HTML', value: 'html' },
           { name: 'JSON', value: 'json' },
+          { name: 'Markdown', value: 'md' },
         ],
-        description: 'HTML returns raw body; JSON returns body plus status and metadata in one object',
+        description:
+          'HTML returns raw body; JSON returns body plus status and metadata; Markdown returns GitHub-Flavored Markdown in the body',
       },
       {
         displayName: 'Options',
@@ -156,7 +158,7 @@ export class Crawlbase implements INodeType {
             default: '',
             placeholder: '#button, body',
             description:
-              'With the JS token: CSS selector to click before capture; use | for multiple steps. URL-encode special characters.',
+              'With the JS token: CSS selector to click before capture; enter raw selectors and use | for multiple steps.',
           },
           {
             displayName: 'custom_success_codes',
@@ -174,9 +176,10 @@ export class Crawlbase implements INodeType {
             options: [
               { name: 'Default', value: '' },
               { name: 'desktop', value: 'desktop' },
+              { name: 'tablet', value: 'tablet' },
               { name: 'mobile', value: 'mobile' },
             ],
-            description: 'desktop or mobile',
+            description: 'desktop, tablet, or mobile',
           },
           {
             displayName: 'get_cookies',
@@ -211,6 +214,14 @@ export class Crawlbase implements INodeType {
             ],
             description: 'Screenshot capture mode when screenshot=true',
             displayOptions: { show: { screenshot: [true] } },
+          },
+          {
+            displayName: 'md_readability',
+            name: 'mdReadability',
+            type: 'boolean',
+            default: false,
+            description: 'When format is Markdown, narrow HTML to main readable content before conversion',
+            displayOptions: { show: { '/format': ['md'] } },
           },
           {
             displayName: 'page_wait',
