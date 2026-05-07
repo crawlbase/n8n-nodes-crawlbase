@@ -28,6 +28,7 @@ Thumbs.db
 *.swp
 *.swo
 *~
+.claude
 
 # Test / coverage
 coverage/

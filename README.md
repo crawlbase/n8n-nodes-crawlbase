@@ -37,7 +37,7 @@ Then in n8n, add the path to this package (the directory containing this README)
 1. Add a **Crawlbase** node to your workflow.
 2. Select your Crawlbase API credential.
 3. Enter a **URL** (e.g. `https://example.com`) or choose **From input item field** and set the field name.
-4. Choose **Method** (GET/POST/PUT) and **Response format** (HTML or JSON).
+4. Choose **Method** (GET/POST/PUT) and **Response format** (HTML, JSON, or Markdown).
 5. Run the workflow. The node outputs `statusCode`, `headers`, `body`, and `metadata` for each URL.
 
 ## Item-list mode
