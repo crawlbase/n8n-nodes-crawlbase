@@ -57,14 +57,6 @@ Crawlbase applies rate limits depending on your plan. To avoid failures:
 
 See [example-workflow.json](./example-workflow.json) for a workflow that crawls a single public URL and returns HTML. Import it in n8n via **Workflows** → **Import from file**.
 
-## Verification and catalog
-
-To get the node **verified** and listed in n8n’s integration catalog:
-
-- Publish this package to npm as `n8n-nodes-crawlbase`.
-- Ensure it meets [n8n’s verification guidelines](https://docs.n8n.io/integrations/community-nodes/build-community-nodes#submit-your-node-for-verification-by-n8n).
-- Submit the node via the [n8n Creator Portal](https://creators.n8n.io/nodes).
-
 ## Links
 
 - [Crawlbase Crawling API docs](https://crawlbase.com/docs/crawling-api)
