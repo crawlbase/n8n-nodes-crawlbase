@@ -6,6 +6,8 @@ import type {
   INodeProperties,
 } from 'n8n-workflow';
 
+const CREDENTIAL_TEST_TARGET_URL = 'https://example.com';
+
 export class CrawlbaseApi implements ICredentialType {
   name = 'crawlbaseApi';
 
@@ -44,7 +46,7 @@ export class CrawlbaseApi implements ICredentialType {
       url: '/',
       method: 'GET',
       qs: {
-        url: '',
+        url: CREDENTIAL_TEST_TARGET_URL,
       },
     },
   };
